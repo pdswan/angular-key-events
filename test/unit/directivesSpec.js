@@ -1,32 +1,5 @@
 'use strict';
 
-/* jasmine specs for directives go here */
-
-//describe('directives', function() {
-//  beforeEach(module('myApp.directives'));
-//
-//  describe('app-version', function() {
-//    it('should print current version', function() {
-//      module(function($provide) {
-//        $provide.value('version', 'TEST_VER');
-//      });
-//      inject(function($compile, $rootScope) {
-//        var element = $compile('<span app-version></span>')($rootScope);
-//        expect(element.text()).toEqual('TEST_VER');
-//      });
-//    });
-//  });
-//});
-
-/**
-* Triggers a browser event. Attempts to choose the right event if one is
-* not specified.
-*
-* @param {Object} element Either a wrapped jQuery/jqLite node or a DOMElement
-* @param {string} type Optional event type.
-* @param {Array.<string>=} keys Optional list of pressed keys
-* (valid values: 'alt', 'meta', 'shift', 'ctrl')
-*/
 function simulateKeyEvent(element, type, keycode, keys) {
   if (element && !element.nodeName) element = element[0];
 
@@ -48,7 +21,9 @@ function simulateKeyEvent(element, type, keycode, keys) {
     return originalPreventDefault.apply(evnt, arguments);
   };
 
-  evnt.initKeyboardEvent(
+  var initFn = angular.isFunction(evnt.initKeyboardEvent) ? 'initKeyboardEvent' : 'initKeyEvent';
+
+  evnt[initFn](
       type,             //  in DOMString typeArg,
       true,             //  in boolean canBubbleArg,                                                        
       true,             //  in boolean cancelableArg,                                                       
@@ -73,25 +48,29 @@ describe('keyEvents', function() {
 
   beforeEach(module('directives.keyEvents'));
 
-  describe('keydown', function() {
-    it('should get called for a single key code', inject(function($compile, $rootScope) {
-      var element = $compile('<div keydown="{ \'thing=true\': 13 }"></div>')($rootScope);
-      expect($rootScope.thing).toBeFalsy();
+  angular.forEach(['keydown', 'keyup', 'keypress'], function(evtName) {
 
-      simulateKeyEvent(element, 'keydown', 13);
-      expect($rootScope.thing).toEqual(true);
-    }));
+    describe(evtName, function() {
+      it('should get called for a single key code', inject(function($compile, $rootScope) {
+        var element = $compile('<div ' + evtName + '="{ \'thing=true\': 13 }"></div>')($rootScope);
+        expect($rootScope.thing).toBeFalsy();
 
-    //it('should get called for multiple key codes', inject(function($compile, $rootScope) {
-    //  var element = $compile('<div keydown="{ \'thing=!thing\': [13, 24] }"></div>')($rootScope);
-    //  expect($rootScope.thing).toBeFalsy();
+        simulateKeyEvent(element, evtName, 13);
+        expect($rootScope.thing).toEqual(true);
+      }));
 
-    //  simulateKeyEvent(element, 'keydown', 13);
-    //  expect($rootScope.thing).toEqual(true);
+      it('should get called for multiple key codes', inject(function($compile, $rootScope) {
+        var element = $compile('<div ' + evtName + '="{ \'thing=!thing\': [13, 24] }"></div>')($rootScope);
+        expect($rootScope.thing).toBeFalsy();
 
-    //  simulateKeyEvent(element, 'keydown', 24);
-    //  expect($rootScope.thing).toEqual(false);
-    //}));
+        simulateKeyEvent(element, evtName, 13);
+        expect($rootScope.thing).toEqual(true);
+
+        simulateKeyEvent(element, evtName, 24);
+        expect($rootScope.thing).toEqual(false);
+      }));
+    });
+
   });
 });
 
