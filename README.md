@@ -8,7 +8,7 @@ Infrastructure courtesy of [angular-seed](https://github.com/angular/angular-see
 
 *Note* tests are currently only passing in Firefox, and one of them is failing =/
 
-We recommend using [jasmine](http://pivotal.github.com/jasmine/) and
+We recommend using [jasmine](https://jasmine.github.io/) and
 [JsTestDriver](http://code.google.com/p/js-test-driver/) for your unit tests/specs, but you are free
 to use whatever works for you.
 
